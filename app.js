@@ -15,12 +15,12 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
 const app = express();
 
 console.log(process.env.NODE_ENV, 'NODENEV');
-const origin = process.env.NODE_ENV === 'development' ? ['http://localhost:3000'] : ['the-linkoo.netlify.app'];
+const origin = process.env.NODE_ENV === 'development' ? ['http://localhost:3000'] : ['https://the-linkoo.netlify.app/'];
 app.use(cors({ origin: origin }));
 app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
-    res.send({ success: true });
+    res.send({ success: true, NODE_ENV: process.env.NODE_ENV, origin: origin });
 });
 
 app.post('/register', async (req, res) => {
