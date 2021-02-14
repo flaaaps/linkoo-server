@@ -1,32 +1,33 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const cors = require('cors');
+import express from 'express';
+import mongoose from 'mongoose';
+import bodyParser from 'body-parser';
+import * as tag from './utils/tag.js';
+
+import cors from 'cors';
 require('dotenv/config');
 
-const UserModel = require('./models/User.js');
-const MessageModel = require('./models/Message.js');
+import { UserModel, User } from './models/User.js';
+import MessageModel from './models/Message.js';
 
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false }, (err) => {
+mongoose.connect(process.env.MONGO_URI!, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false }, (err) => {
     if (err) return console.log('An error occurred while connection to db', err);
     console.log('Connected to db');
 });
 
 const app = express();
 
-console.log(process.env.NODE_ENV, 'NODENEV');
-const origin = process.env.NODE_ENV === 'development' ? ['http://localhost:3000'] : ['https://the-linkoo.netlify.app/'];
-app.use(cors({ origin: origin }));
+const whiteLists = process.env.NODE_ENV === 'development' ? ['http://localhost:3000'] : ['https://linkoo.netlify.app/'];
+app.use(cors({ origin: whiteLists }));
 app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
-    res.send({ success: true, NODE_ENV: process.env.NODE_ENV, origin: origin });
+    res.send({ success: true, NODE_ENV: process.env.NODE_ENV, origin: whiteLists });
 });
 
 app.post('/register', async (req, res) => {
-    if (!req.body.name) return res.send({ success: false, message: 'Please specify a name' });
+    // if (!req.body.name) return res.send({ success: false, message: 'Please specify a name' });
     const user = new UserModel({
-        name: req.body.name,
+        name: await tag.generate(),
     });
     user.save().then((doc) => {
         console.log('Saved user:', doc);
@@ -81,4 +82,4 @@ app.get('/messages/all', async (req, res) => {
     });
 });
 
-module.exports = app;
+export default app;

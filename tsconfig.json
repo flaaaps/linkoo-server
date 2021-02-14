@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "module": "CommonJS",
+        "target": "ES2020",
+        "lib": ["ES2020"],
+        "moduleResolution": "Node",
+        "noImplicitAny": false,
+        "strictNullChecks": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "sourceMap": false,
+        "declaration": false,
+        "listEmittedFiles": true,
+        "incremental": true,
+        "tsBuildInfoFile": "buildcache/tsbuildinfo.json",
+        "allowSyntheticDefaultImports": true,
+        "outDir": "out/",
+        "allowJs": true,
+        "checkJs": false,
+        "esModuleInterop": true
+    },
+    "include": ["src/**/*", "bin/**/*", "package.json"]
+}
