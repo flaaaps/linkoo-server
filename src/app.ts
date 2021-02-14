@@ -25,7 +25,6 @@ app.get('/', (req, res) => {
 });
 
 app.post('/register', async (req, res) => {
-    // if (!req.body.name) return res.send({ success: false, message: 'Please specify a name' });
     const user = new UserModel({
         name: await tag.generate(),
     });
@@ -46,6 +45,7 @@ app.post('/login', async (req, res) => {
             name: doc.name,
             createdAt: doc.createdAt,
         };
+        console.log('Logged user in:', doc);
         res.send({ success: true, user: doc });
     });
 });
@@ -53,7 +53,7 @@ app.post('/login', async (req, res) => {
 app.post('/messages/create', async (req, res) => {
     const userId = req.body.userId;
     const content = req.body.content;
-    if (!userId || !content) return res.send({ success: false, message: 'Please provide a user id and content' });
+    if (!userId || !content) return res.send({ success: false, message: 'Please provide a "userId" and a "content" field' });
 
     const user = await UserModel.findOne({ identifier: userId });
     if (!user) return res.send({ success: false, message: `User with id ${userId} not found.` });
