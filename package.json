@@ -5,6 +5,7 @@
     "license": "MIT",
     "scripts": {
         "compile": "npx tsc",
+        "dev": "npm run compile && node ./bin/www",
         "start": "node ./bin/www",
         "zip": "bestzip ../server.zip out/"
     },
