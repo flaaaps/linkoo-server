@@ -1,5 +1,5 @@
-import * as mongoose from 'mongoose';
-import * as shortid from 'shortid';
+import mongoose from 'mongoose';
+import shortid from 'shortid';
 
 import Model from './Model.js';
 
