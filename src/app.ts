@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import * as tag from './utils/tag.js';
 import shortid from 'shortid';
+import { Server, Socket } from 'socket.io';
+import { createServer } from 'http';
 
 import cors from 'cors';
 require('dotenv/config');
@@ -10,13 +12,46 @@ require('dotenv/config');
 import { UserModel, User } from './models/User.js';
 import MessageModel from './models/Message.js';
 
+import * as validate from './utils/validate.js';
+
+const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST'],
+        allowedHeaders: ['*'],
+        credentials: true,
+    },
+});
+
 mongoose.connect(process.env.MONGO_URI!, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false }, (err) => {
     if (err) return console.log('An error occurred while connection to db', err);
     console.log('Connected to db');
+
+    const client = mongoose.connection.getClient();
+    const db = client.db('linkoo');
+    const collection = db.collection('messages');
+    const changeStream = collection.watch();
+    changeStream.on('change', (next: any) => {
+        console.log('Something changed:', next);
+        if (!next.fullDocument) return console.log("Err full document doesn't exist");
+        const document = next.fullDocument;
+        console.log('Sending document to user with id', document.userId);
+        io.to(document.userId).emit('message', document);
+    });
 });
 
-const app = express();
-
+io.on('connect', (socket: Socket) => {
+    socket.on('login', async (identifier) => {
+        console.log('Request at login socket');
+        console.log(`Identifier:`, identifier);
+        const response = await validate.username(identifier);
+        if (!response) return socket.emit('login', 'Error while validating user');
+        socket.join(identifier);
+        socket.emit('login', { success: true, user: response });
+    });
+});
 const whiteLists = process.env.NODE_ENV === 'development' ? ['http://localhost:3000'] : ['https://linkoo.netlify.app/'];
 app.use(cors());
 app.use(bodyParser.json());
@@ -42,6 +77,7 @@ app.post('/login', async (req, res) => {
     if (!name) return res.send({ success: false, message: 'Please provide a user id' });
     await UserModel.findOne({ name: name }, (err, doc) => {
         if (err) return res.send({ success: false, message: 'An unexpected error occurred.' });
+        if (!doc) return res.send({ success: false, message: 'User not found' });
         doc = {
             identifier: doc.identifier,
             name: doc.name,
@@ -86,4 +122,13 @@ app.get('/messages/all', async (req, res) => {
     });
 });
 
-export default app;
+app.post('/user/validate', async (req, res) => {
+    console.log('Called validation route with id', req.body.userId);
+    const validationResult = await validate.username(req.body.userId, false);
+    console.log('Validation result:', validationResult);
+    res.send({ success: validationResult });
+});
+
+// server.listen(process.env.PORT || '5441');
+httpServer.listen('5441');
+// export default app;
