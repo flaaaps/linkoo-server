@@ -27,6 +27,7 @@ app.get('/', (req, res) => {
 
 app.post('/register', async (req, res) => {
     const user = new UserModel({
+        identifier: shortid.generate(),
         name: await tag.generate(),
     });
     user.save().then((doc) => {
