@@ -50,6 +50,9 @@ io.on('connect', (socket: Socket) => {
         if (!response) return socket.emit('login', 'Error while validating user');
         socket.join(identifier);
         socket.emit('login', { success: true, user: response });
+        socket.on('leave', () => {
+            socket.leave(identifier);
+        });
     });
 });
 const whiteLists = process.env.NODE_ENV === 'development' ? ['http://localhost:3000'] : ['https://linkoo.netlify.app/'];
