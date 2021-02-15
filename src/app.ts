@@ -130,5 +130,5 @@ app.post('/user/validate', async (req, res) => {
 });
 
 // server.listen(process.env.PORT || '5441');
-httpServer.listen('5441');
+httpServer.listen(process.env.PORT || '5441');
 // export default app;
