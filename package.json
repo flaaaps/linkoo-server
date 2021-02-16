@@ -5,8 +5,8 @@
     "license": "MIT",
     "scripts": {
         "compile": "npx tsc",
-        "dev": "npm run compile && node ./bin/www",
-        "start": "node ./bin/www",
+        "dev": "npm run compile && node ./out/app.js",
+        "start": "node ./out/app.js",
         "zip": "bestzip ../server.zip out/"
     },
     "dependencies": {
