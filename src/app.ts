@@ -13,7 +13,7 @@ import { UserModel, User } from './models/User.js';
 import MessageModel, { Message } from './models/Message.js';
 
 import * as validate from './utils/validate.js';
-import Model from "./models/Model.js";
+import Model from './models/Model.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -41,8 +41,7 @@ mongoose.connect(process.env.MONGO_URI!, { useNewUrlParser: true, useUnifiedTopo
         const socketsInRoom = io.sockets.adapter.rooms.get(document.userId)?.size;
 
         if (socketsInRoom && socketsInRoom > 0) {
-            MessageModel.updateOne({ id: document.id }, { $set: { read: true } })
-                .then(() => console.log("Marked document as read."))
+            MessageModel.updateOne({ id: document.id }, { $set: { read: true } }).then(() => console.log('Marked document as read.'));
 
             console.log('Sending document to user with id', document.userId);
             io.to(document.userId).emit('message', document);
@@ -63,13 +62,13 @@ io.on('connect', (socket: Socket) => {
         });
 
         MessageModel.find({ userId: identifier, read: false }, (_, docs) => {
-            docs.forEach(document => {
-                socket.emit("message", document)
-                console.log(`> Retrospectively emitted ${document.id} to ${identifier}`)
-                document.read = true
-                document.save()
-            })
-        })
+            docs.forEach((document) => {
+                socket.emit('message', document);
+                console.log(`> Retrospectively emitted ${document.id} to ${identifier}`);
+                document.read = true;
+                document.save();
+            });
+        });
     });
 });
 const whiteLists = process.env.NODE_ENV === 'development' ? ['http://localhost:3000'] : ['https://linkoo.netlify.app/'];
@@ -120,7 +119,7 @@ app.post('/messages/create', async (req, res) => {
         id: shortid.generate(),
         userId,
         content,
-        read: false
+        read: false,
     });
     message.save().then((doc) => {
         console.log('Saved message:', doc);
