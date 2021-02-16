@@ -22,6 +22,11 @@ const MessageSchema = new mongoose.Schema({
         default: Date.now(),
         required: true,
     },
+    read: {
+        type: Boolean,
+        default: false,
+        required: true
+    }
 });
 
 export interface Message {
@@ -29,6 +34,7 @@ export interface Message {
     id: string;
     content: string;
     createdAt: number;
+    read: boolean
 }
 
 const MessageModel = mongoose.model<Model<Message>>('Message', MessageSchema, 'messages');
