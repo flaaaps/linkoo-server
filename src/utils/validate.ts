@@ -1,7 +1,7 @@
 import mongoose, { Model } from 'mongoose';
 import { User, UserModel } from '../models/User.js';
 
-export async function username(name: string, returnDoc: boolean = true) {
+export async function username(name: string, returnDoc: boolean = true): Promise<any> {
     console.log('[Validate | Username] Starting validation for user with id', name);
     return await UserModel.findOne({ name: name }).then((doc) => {
         console.log('It is', !!doc);
