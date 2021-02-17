@@ -40,6 +40,8 @@ mongoose.connect(process.env.MONGO_URI!, { useNewUrlParser: true, useUnifiedTopo
         const document = next.fullDocument as Message;
         const socketsInRoom = io.sockets.adapter.rooms.get(document.userId)?.size;
 
+        console.log('Sockets in room:', socketsInRoom);
+
         if (socketsInRoom && socketsInRoom > 0) {
             MessageModel.updateOne({ id: document.id }, { $set: { read: true } }).then(() => console.log('Marked document as read.'));
 
@@ -53,16 +55,18 @@ io.on('connect', (socket: Socket) => {
     socket.on('login', async (name) => {
         console.log('Request at login socket');
         console.log(`Identifier:`, name);
-        const response = await validate.username(name);
+        const response = await validate.username(name, true);
         if (!response) return socket.emit('login', 'Error while validating user');
-        socket.join(name);
+        const identifier = response?.identifier;
+        socket.join(identifier);
+        console.log(`Joined room`);
         socket.emit('login', { success: true, user: response });
         socket.on('leave', () => {
-            socket.leave(name);
+            socket.leave(identifier);
             socket.emit('leave', { success: true });
         });
 
-        MessageModel.find({ userId: name, read: false }, (_, docs) => {
+        MessageModel.find({ userId: identifier, read: false }, (_, docs) => {
             docs.forEach((document) => {
                 socket.emit('message', document);
                 console.log(`> Retrospectively emitted ${document.id} to ${name}`);
